@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title id="pageTitle">Student Officer Voting System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f2f6fa;
+    }
+    h2 {
+      color: #003366;
+      text-align: center;
+    }
+    .box {
+      background: white;
+      border: 2px solid #003366;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 900px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .hidden { display: none; }
+    input, select, textarea, button {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    .row { display:flex; gap:10px; }
+    .row > * { flex: 1; }
+    button {
+      background: #0056b3;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #003d80; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      background: #003366;
+      color: white;
+    }
+    caption {
+      caption-side: top;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #003366;
+      font-size: 16px;
+    }
+    .actionBtn {
+      background: #0073e6;
+      color: white;
+      padding: 5px 8px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right:6px;
+    }
+    .actionBtn:hover {
+      background: #005bb5;
+    }
+    .deleteBtn {
+      background: #d9534f;
+    }
+    .deleteBtn:hover {
+      background: #b52b27;
+    }
+    .posCard { border:1px solid #e0e0e0; padding:10px; border-radius:8px; margin-bottom:10px; }
+    .positionHeader { font-weight:bold; margin-bottom:6px; color:#003366; }
+    .timestamp { font-size:12px; color:#666; margin-bottom:8px; }
+    .small { font-size:12px; color:#444; }
+  </style>
+</head>
+<body>
+  <h2 id="mainTitle">Student Officer Voting System</h2>
+
+  <!-- MAIN LOGIN -->
+  <div id="mainLogin" class="box">
+    <h3 style="text-align:center;">Welcome to Student Officer Voting System! Choose Login Type</h3>
+    <div class="btnRow" style="display:flex;justify-content:center;gap:10px;">
+      <button onclick="showAdminLogin()">Admin Login</button>
+      <button onclick="showStudentLogin()">Student Login</button>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN -->
+  <div id="adminLoginBox" class="box hidden">
+    <h3>Admin Login</h3>
+    <label>Username:</label>
+    <input type="text" id="adminUser" placeholder="Enter admin username" value="">
+    <label>Password:</label>
+    <input type="password" id="adminPass" placeholder="Enter password" value="">
+    <div class="btnRow" style="display:flex;gap:10px;">
+      <button onclick="adminLogin()">Login</button>
+      <button onclick="backToMain()">Back</button>
+    </div>
+  </div>
+
+  <!-- STUDENT LOGIN -->
+  <div id="studentLoginBox" class="box hidden">
+    <h3>Student Login</h3>
+    <label>Username:</label>
+    <input type="text" id="studentUser" placeholder="Enter student username" value="">
+    <label>Password:</label>
+    <input type="password" id="studentPass" placeholder="Enter password" value="">
+    <div class="btnRow" style="display:flex;gap:10px;">
+      <button onclick="studentLogin()">Login</button>
+      <button onclick="backToMain()">Back</button>
+    </div>
+  </div>
+
+  <!-- LOGOUT -->
+  <div id="logoutBox" class="box hidden" style="text-align:right;">
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" class="box hidden">
+    <h3>Admin Panel</h3>
+    <label>System Title:</label>
+    <input type="text" id="schoolNameInput" value="Student Officer Voting System">
+    <button onclick="updateSchoolName()">Update Title</button>
+    <hr>
+
+    <label>Position:</label>
+    <select id="positionSelect"></select>
+
+    <label>Candidate Name:</label>
+    <input type="text" id="candidateInput" placeholder="Full name">
+
+    <label>Year & Section:</label>
+    <input type="text" id="candidateYearSection" placeholder="e.g., Grade 12 - STEM A">
+
+    <label>Description:</label>
+    <textarea id="candidateDesc" placeholder="Short description (e.g., Platform or goals)"></textarea>
+
+    <label>Photo:</label>
+    <input type="file" id="imageFile" accept="image/*">
+
+    <button onclick="addCandidate()">Add Candidate</button>
+    <hr>
+
+    <h4>Manage Positions</h4>
+    <input type="text" id="newPosition" placeholder="Enter new position">
+    <div class="btnRow" style="display:flex;gap:10px;">
+      <button onclick="addPosition()">Add</button>
+      <button onclick="editPosition()">Edit (selected)</button>
+      <button onclick="deletePosition()">Delete (selected)</button>
+    </div>
+    <hr>
+
+    <label>Search Candidate:</label>
+    <input type="text" id="searchInput" onkeyup="searchCandidate()" placeholder="Search by name...">
+    <div id="candidateList"></div>
+  </div>
+
+  <!-- STUDENT VOTING -->
+  <div id="studentPanel" class="box hidden">
+    <h3>Student Voting Portal</h3>
+    <label>Student Name:</label>
+    <input type="text" id="voterName" placeholder="Enter your full name" required>
+
+    <div class="row">
+      <div>
+        <label>Grade:</label>
+        <input type="text" id="voterGrade" placeholder="e.g., Grade 12" required>
+      </div>
+      <div>
+        <label>Section:</label>
+        <input type="text" id="voterSection" placeholder="e.g., STEM A" required>
+      </div>
+    </div>
+
+    <label>Student ID:</label>
+    <input type="text" id="studentId" placeholder="Enter your Student ID" required>
+
+    <div id="voteArea"></div>
+    <button onclick="submitVote()">Submit Vote</button>
+  </div>
+
+  <!-- RESULTS DASHBOARD -->
+  <div id="resultsBox" class="box hidden">
+    <h3>Results Dashboard</h3>
+    <div id="dashboardResults"></div>
+  </div>
+
+  <!-- VOTER LIST PAGE -->
+  <div id="voterListBox" class="box hidden">
+    <h3>Voter List (Who Voted)</h3>
+    <table id="voterTable">
+      <tr><th>Student ID</th><th>Name</th><th>Grade</th><th>Section</th><th>Date & Time</th></tr>
+    </table>
+  </div>
+
+  <script>
+    // Utility: safe DOM access
+    const $ = id => document.getElementById(id);
+
+    // Utility: sanitize position name -> usable radio 'name'
+    function safeName(pos) {
+      return String(pos).trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
+    }
+
+    // Utility: escape single quotes in strings for inline handlers
+    function escapeForInline(str) {
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    // Data and state
+    let schoolName = "Student Officer Voting System";
+    const users = { admin: "123", student: "123" };
+    let currentUser = "";
+    let votedIDs = new Set();
+    let voterList = [];
+    let positions = ["President", "Vice President", "Secretary", "Treasurer"];
+
+    let pollData = {
+      "President": {
+        "Maria Santos": { votes: 0, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8I7fl5Qk1gEPLFNoGdf1t0yVKC_RJGIf11A&s", yearSec: "Grade 12 - STEM A", desc: "Advocates for student inclusivity and academic support." },
+        "Juan Dela Cruz": { votes: 0, img: "https://thumbs.dreamstime.com/b/minimalist-portrait-icon-young-man-short-hair-t-shirt-simple-clean-line-presented-style-against-white-background-388712009.jpg", yearSec: "Grade 12 - HUMSS B", desc: "Focuses on improving student facilities and safety." }
+      },
+      "Vice President": {
+        "Ana Reyes": { votes: 0, img: "https://i.pinimg.com/236x/99/8f/41/998f41fc4c63e69c06b99a6e03629815.jpg", yearSec: "Grade 11 - ABM A", desc: "Supports campus cleanliness and environment programs." }
+      },
+      "Secretary": {
+        "Mark Bautista": { votes: 0, img: "https://static.vecteezy.com/system/resources/previews/008/284/343/non_2x/nice-boy-children-face-portrait-flat-illustration-for-profile-picture-free-vector.jpg", yearSec: "Grade 12 - TVL", desc: "Ensures transparency and timely student announcements." }
+      },
+      "Treasurer": {
+        "Ella Gomez": { votes: 0, img: "https://i.pinimg.com/564x/9b/f3/e3/9bf3e34070cac29be3a86c3a71826bec.jpg", yearSec: "Grade 11 - STEM B", desc: "Plans better budgeting for student activities." }
+      }
+    };
+
+    let uploadedImage = "";
+
+    // INITIALIZE
+    function updatePositionDropdown() {
+      const sel = $('positionSelect');
+      sel.innerHTML = "";
+      positions.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        sel.appendChild(opt);
+      });
+    }
+    updatePositionDropdown();
+
+    // NAV
+    function showAdminLogin() { $('mainLogin').classList.add("hidden"); $('adminLoginBox').classList.remove("hidden"); }
+    function showStudentLogin() { $('mainLogin').classList.add("hidden"); $('studentLoginBox').classList.remove("hidden"); }
+    function backToMain() { document.querySelectorAll(".box").forEach(b => b.classList.add("hidden")); $('mainLogin').classList.remove("hidden"); }
+
+    function adminLogin() {
+      const user = $('adminUser').value.trim();
+      const pass = $('adminPass').value;
+      if (user === "admin" && pass === users.admin) {
+        currentUser = "admin";
+        showAdmin();
+      } else {
+        alert("Invalid admin credentials");
+      }
+    }
+    function studentLogin() {
+      const user = $('studentUser').value.trim();
+      const pass = $('studentPass').value;
+      if (user === "student" && pass === users.student) {
+        currentUser = "student";
+        showStudent();
+      } else {
+        alert("Invalid student credentials");
+      }
+    }
+    function logout() {
+      currentUser = "";
+      document.querySelectorAll(".box").forEach(b => b.classList.add("hidden"));
+      $('mainLogin').classList.remove("hidden");
+    }
+
+    function showAdmin() {
+      document.querySelectorAll(".box").forEach(b => b.classList.add("hidden"));
+      $('logoutBox').classList.remove("hidden");
+      $('adminPanel').classList.remove("hidden");
+      $('resultsBox').classList.remove("hidden");
+      $('voterListBox').classList.remove("hidden");
+      renderAll();
+    }
+
+    function showStudent() {
+      document.querySelectorAll(".box").forEach(b => b.classList.add("hidden"));
+      $('logoutBox').classList.remove("hidden");
+      $('studentPanel').classList.remove("hidden");
+      renderVoteArea();
+    }
+
+    // IMAGE UPLOAD
+    $('imageFile').addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => uploadedImage = ev.target.result;
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // POSITIONS
+    function addPosition() {
+      const newPos = $('newPosition').value.trim();
+      if (!newPos) return alert("Enter a position name.");
+      if (positions.includes(newPos)) return alert("Position already exists.");
+      positions.push(newPos);
+      pollData[newPos] = {};
+      updatePositionDropdown();
+      $('newPosition').value = "";
+      renderAll();
+      alert("Position added!");
+    }
+
+    function editPosition() {
+      const sel = $('positionSelect');
+      const selected = sel.value;
+      if (!selected) return alert("Please select a position to edit.");
+      const newName = prompt("Edit position name:", selected);
+      if (!newName) return;
+      if (newName !== selected && positions.includes(newName)) return alert("A position with that name already exists.");
+      // update positions array
+      const idx = positions.indexOf(selected);
+      if (idx === -1) return;
+      positions[idx] = newName;
+      // move pollData
+      pollData[newName] = pollData[selected] || {};
+      if (newName !== selected) delete pollData[selected];
+      updatePositionDropdown();
+      renderAll();
+      alert("Position updated.");
+    }
+
+    function deletePosition() {
+      const sel = $('positionSelect');
+      const selected = sel.value;
+      if (!selected) return alert("Please select a position to delete.");
+      if (!confirm(`Are you sure you want to delete position "${selected}" and all its candidates?`)) return;
+      const idx = positions.indexOf(selected);
+      if (idx !== -1) positions.splice(idx, 1);
+      delete pollData[selected];
+      updatePositionDropdown();
+      renderAll();
+      alert("Position deleted.");
+    }
+
+    // CANDIDATES
+    function addCandidate() {
+      const pos = $('positionSelect').value;
+      const name = $('candidateInput').value.trim();
+      const yearSec = $('candidateYearSection').value.trim();
+      const desc = $('candidateDesc').value.trim();
+      if (!pos) return alert("Select a position.");
+      if (!name || !yearSec || !desc) return alert("Please fill in all candidate details.");
+      const img = uploadedImage || `https://via.placeholder.com/80?text=${encodeURIComponent(name)}`;
+      if (!pollData[pos]) pollData[pos] = {};
+      if (pollData[pos][name]) return alert("Candidate already exists.");
+      pollData[pos][name] = { votes: 0, img, yearSec, desc };
+      $('candidateInput').value = "";
+      $('candidateYearSection').value = "";
+      $('candidateDesc').value = "";
+      $('imageFile').value = "";
+      uploadedImage = "";
+      renderAll();
+      alert("Candidate added!");
+    }
+
+    function editCandidate(pos, name) {
+      const c = pollData[pos][name];
+      if (!c) return alert("Candidate not found.");
+      const newName = prompt("Edit candidate name:", name) || name;
+      const newYear = prompt("Edit year & section:", c.yearSec) || c.yearSec;
+      const newDesc = prompt("Edit description:", c.desc) || c.desc;
+
+      // Ask admin if they want to replace image
+      const changeImg = confirm("Would you like to replace the candidate photo?");
+      if (changeImg) {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+        fileInput.onchange = e => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = ev => applyCandidateEdit(pos, name, newName, newYear, newDesc, ev.target.result);
+            reader.readAsDataURL(file);
+          } else {
+            applyCandidateEdit(pos, name, newName, newYear, newDesc, c.img);
+          }
+        };
+        fileInput.click();
+      } else {
+        applyCandidateEdit(pos, name, newName, newYear, newDesc, c.img);
+      }
+    }
+
+    function applyCandidateEdit(pos, oldName, newName, newYear, newDesc, newImg) {
+      const c = pollData[pos][oldName];
+      if (!c) return;
+      if (newName !== oldName) {
+        // move votes and replace
+        pollData[pos][newName] = { votes: c.votes, img: newImg, yearSec: newYear, desc: newDesc };
+        delete pollData[pos][oldName];
+      } else {
+        pollData[pos][oldName] = { ...c, img: newImg, yearSec: newYear, desc: newDesc };
+      }
+      renderAll();
+      alert("Candidate updated!");
+    }
+
+    function deleteCandidate(pos, name) {
+      if (!confirm(`Are you sure you want to delete "${name}" from ${pos}?`)) return;
+      delete pollData[pos][name];
+      renderAll();
+    }
+
+    // SEARCH
+    function searchCandidate() {
+      const query = $('searchInput').value.toLowerCase();
+      document.querySelectorAll(".candidateRow").forEach(row =>
+        row.style.display = row.dataset.name.toLowerCase().includes(query) ? "" : "none"
+      );
+    }
+
+    // RENDER
+    function renderAdminList() {
+      const candidateList = $('candidateList');
+      candidateList.innerHTML = "";
+      positions.forEach(pos => {
+        const table = document.createElement("table");
+        table.innerHTML = `<caption>${pos}</caption>
+          <tr><th>Picture</th><th>Name</th><th>Year & Section</th><th>Description</th><th>Votes</th><th>Actions</th></tr>`;
+        const candidates = pollData[pos] || {};
+        Object.keys(candidates).forEach(name => {
+          const c = candidates[name];
+          const row = document.createElement("tr");
+          row.classList.add("candidateRow");
+          row.dataset.name = name;
+          const escPos = escapeForInline(pos);
+          const escName = escapeForInline(name);
+          row.innerHTML = `
+            <td><div style="width:60px;height:60px;overflow:hidden;border-radius:8px;border:1px solid #ccc;"><img src="${c.img}" width="60" height="60" style="object-fit:cover;"></div></td>
+            <td>${name}</td>
+            <td>${c.yearSec}</td>
+            <td>${c.desc}</td>
+            <td>${c.votes}</td>
+            <td>
+              <button class="actionBtn" onclick="editCandidate('${escPos}','${escName}')">Edit</button>
+              <button class="actionBtn deleteBtn" onclick="deleteCandidate('${escPos}','${escName}')">Delete</button>
+            </td>`;
+          table.appendChild(row);
+        });
+        candidateList.appendChild(table);
+      });
+    }
+
+    function renderVoteArea() {
+      const voteArea = $('voteArea');
+      voteArea.innerHTML = "";
+      positions.forEach(pos => {
+        const div = document.createElement("div");
+        div.className = "posCard";
+        div.innerHTML = `<div class='positionHeader'>${pos}</div>`;
+        const candidates = pollData[pos] || {};
+        const radioName = safeName(pos);
+        if (Object.keys(candidates).length === 0) {
+          div.innerHTML += `<div class="small">No candidates for this position yet.</div>`;
+        } else {
+          Object.keys(candidates).forEach(name => {
+            const c = candidates[name];
+            // create a label container
+            const label = document.createElement("label");
+            label.style = "display:flex;align-items:center;gap:10px;margin:5px 0;";
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = radioName;
+            input.value = name;
+            input.style.width = "auto";
+            const imgDiv = document.createElement("div");
+            imgDiv.style = "width:60px;height:60px;overflow:hidden;border-radius:8px;border:1px solid #ccc;";
+            const img = document.createElement("img");
+            img.src = c.img;
+            img.width = 60;
+            img.height = 60;
+            img.style.objectFit = "cover";
+            imgDiv.appendChild(img);
+            const info = document.createElement("div");
+            info.innerHTML = `<strong>${name}</strong><br><small>${c.yearSec}</small><br><em>${c.desc}</em>`;
+            label.appendChild(input);
+            label.appendChild(imgDiv);
+            label.appendChild(info);
+            div.appendChild(label);
+          });
+        }
+        voteArea.appendChild(div);
+      });
+    }
+
+    function submitVote() {
+      const id = $('studentId').value.trim();
+      const name = $('voterName').value.trim();
+      const grade = $('voterGrade').value.trim();
+      const section = $('voterSection').value.trim();
+
+      if (!id || !name || !grade || !section) return alert("Please fill in your name, grade, section, and student ID.");
+      if (votedIDs.has(id)) return alert("You already voted.");
+      let allSelected = true;
+      const chosenPerPos = [];
+
+      // Check each position
+      for (const pos of positions) {
+        const radioName = safeName(pos);
+        const chosen = document.querySelector(`input[name='${radioName}']:checked`);
+        if (!chosen) {
+          allSelected = false;
+          break;
+        } else {
+          const candidateName = chosen.value;
+          // safety check if candidate exists
+          if (!pollData[pos] || !pollData[pos][candidateName]) {
+            alert(`Selected candidate for ${pos} not found. Please try again.`);
+            return;
+          }
+          chosenPerPos.push({ pos, candidateName });
+        }
+      }
+
+      if (!allSelected) return alert("Please vote for all positions.");
+
+      // Apply votes
+      chosenPerPos.forEach(item => {
+        pollData[item.pos][item.candidateName].votes++;
+      });
+
+      // Record voter info
+      votedIDs.add(id);
+      const now = new Date().toLocaleString();
+      voterList.push({ id, name, grade, section, time: now });
+      renderVoterList();
+
+      // Clear form
+      $('studentId').value = "";
+      $('voterName').value = "";
+      $('voterGrade').value = "";
+      $('voterSection').value = "";
+
+      alert("Thank you for voting!");
+      renderDashboard();
+    }
+
+    // Render voter list table
+    function renderVoterList() {
+      const table = $('voterTable');
+      table.innerHTML = "<tr><th>Student ID</th><th>Name</th><th>Grade</th><th>Section</th><th>Date & Time</th></tr>";
+      voterList.forEach(v => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${v.id}</td><td>${v.name}</td><td>${v.grade}</td><td>${v.section}</td><td>${v.time}</td>`;
+        table.appendChild(row);
+      });
+    }
+
+    // Dashboard
+    function renderDashboard() {
+      const container = $('dashboardResults');
+      container.innerHTML = ""; // clear first
+      const now = new Date();
+      const dateTime = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+      const ts = document.createElement("div");
+      ts.className = "timestamp";
+      ts.textContent = `Last Updated: ${dateTime}`;
+      container.appendChild(ts);
+
+      positions.forEach(pos => {
+        const card = document.createElement("div");
+        card.className = "posCard";
+        card.innerHTML = `<div class='positionHeader'>${pos}</div>`;
+        const candidates = pollData[pos] || {};
+        // find leader
+        let leader = null, maxVotes = -1;
+        Object.keys(candidates).forEach(name => {
+          if (candidates[name].votes > maxVotes) {
+            maxVotes = candidates[name].votes;
+            leader = name;
+          }
+        });
+        if (Object.keys(candidates).length === 0) {
+          card.innerHTML += `<div class="small">No candidates.</div>`;
+        } else {
+          Object.keys(candidates).forEach(name => {
+            const c = candidates[name];
+            const isLeader = name === leader;
+            const item = document.createElement("div");
+            item.style = `display:flex;align-items:center;gap:10px;margin:5px 0;${isLeader ? 'background:#dff0d8;padding:6px;border-radius:6px;' : ''}`;
+            item.innerHTML = `
+              <div style="width:60px;height:60px;overflow:hidden;border-radius:8px;border:1px solid #ccc;"><img src="${c.img}" width="60" height="60" style="object-fit:cover;"></div>
+              <div><strong>${name}</strong><br><small>${c.yearSec}</small><br><em>${c.desc}</em></div>
+              <div style="margin-left:auto;font-weight:bold;">Votes: ${c.votes}</div>
+            `;
+            card.appendChild(item);
+          });
+        }
+        container.appendChild(card);
+      });
+    }
+
+    function renderAll() {
+      updatePositionDropdown();
+      renderAdminList();
+      renderVoteArea();
+      renderDashboard();
+      renderVoterList();
+    }
+
+    // attach some initial behavior
+    renderAll();
+  </script>
+</body>
+</html>
